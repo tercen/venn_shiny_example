@@ -17,8 +17,8 @@ library(dplyr)
 library(shiny)
 library(VennDiagram)
 # library(xlsx)
-
-# futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+ 
+futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -67,6 +67,8 @@ shinyServer(function(input, output, session) {
   
   # online plot
   output$venn <- renderPlot({
+    
+    filename = tempfile()
      
     VD <- venn.diagram(plot.data(), filename = NULL, fill = plot.color(), cex = input$num.fontsize,
                        margin = input$marginsize, cat.cex = input$cat.fontsize, 
