@@ -8,7 +8,7 @@
 #
 # .libPaths("/srv/shiny-server/VennDiagram/libs")
 gitversion <- function(){ 
-  return("no version")
+  return("no_version")
 }
 
 library(tercen)
@@ -23,8 +23,7 @@ futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
   
-  # reformat input data
-  plot.data <- reactive({
+  getCtx = reactive({
     # retreive url query parameters provided by tercen
     query = parseQueryString(session$clientData$url_search)
     
@@ -32,12 +31,19 @@ shinyServer(function(input, output, session) {
     taskId = query[["taskId"]]
     
     # create a Tercen context object using the taskId and token
-    ctx = tercenCtx(taskId=taskId, authToken=token)
+    # ctx = tercenCtx(taskId=taskId, authToken=token)
     
     # for testing
-    # options("tercen.workflowId"= "3aa8703da6b7534488c2f9632a0c0b0d")
-    # options("tercen.stepId"= "11-6")
-    # ctx = tercenCtx()
+    options("tercen.workflowId"= "3aa8703da6b7534488c2f9632a0c0b0d")
+    options("tercen.stepId"= "11-6")
+    ctx = tercenCtx()
+    
+  })
+   
+  # reformat input data
+  plot.data <- reactive({
+    
+    ctx = getCtx()
     
     args = as.list(ctx %>% cselect())
     args$sep='.'
@@ -78,13 +84,14 @@ shinyServer(function(input, output, session) {
   # table of objects in overlap
   output$overlap <- renderTable({
     if (input$table){
+      ctx = getCtx()
       
       args = as.list(ctx %>% rselect())
       args$sep='.'
       
       feature.names = do.call(paste, args)
       
-      OV = calculate.overlap(plot.data)
+      OV = calculate.overlap(plot.data())
        
       OV = lapply(OV[sapply(OV, length) > 0], function(c) {
         sapply(c, function(i) feature.names[i+1])
@@ -123,20 +130,30 @@ shinyServer(function(input, output, session) {
     }
   )
   output$downloadTable <- downloadHandler(
+    # contentType = "text/csv",
     filename = function() {
       paste(input$outfile,".overlap.",gitversion(),".csv", sep = "")
     },
     content = function(file) {
-      if (input$table){
-        OV<- calculate.overlap(plot.data())
-        OV <- sapply(OV, as.character)
-        n.obs <- sapply(OV, length)
-        seq.max <- seq_len(max(n.obs))
-        mat <- t(sapply(OV, "[", i = seq.max))
-        OV <- data.frame(t(mat))
-        
-        write.csv(OV, file, row.names = FALSE, quote = FALSE, sep = '\t')
-      }
+      ctx = getCtx()
+      
+      args = as.list(ctx %>% rselect())
+      args$sep='.'
+      
+      feature.names = do.call(paste, args)
+      
+      OV = calculate.overlap(plot.data())
+      
+      OV = lapply(OV[sapply(OV, length) > 0], function(c) {
+        sapply(c, function(i) feature.names[i+1])
+      })
+      
+      n.obs <- sapply(OV, length)
+      seq.max <- seq_len(max(n.obs))
+      mat <- t(sapply(OV, "[", i = seq.max))
+      OV = data.frame(t(mat))
+       
+      write.csv(OV, file, row.names = FALSE, quote = FALSE, sep = '\t')
     }
   )
   
