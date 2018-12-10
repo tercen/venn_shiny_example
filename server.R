@@ -67,9 +67,6 @@ shinyServer(function(input, output, session) {
   
   # online plot
   output$venn <- renderPlot({
-    
-    filename = tempfile()
-     
     VD <- venn.diagram(plot.data(), filename = NULL, fill = plot.color(), cex = input$num.fontsize,
                        margin = input$marginsize, cat.cex = input$cat.fontsize, 
                        cat.fontface = input$cat.face, fontface = input$cat.face,
@@ -81,8 +78,18 @@ shinyServer(function(input, output, session) {
   # table of objects in overlap
   output$overlap <- renderTable({
     if (input$table){
-      OV<- calculate.overlap(plot.data())
-      OV <- sapply(OV, as.character)
+      
+      args = as.list(ctx %>% rselect())
+      args$sep='.'
+      
+      feature.names = do.call(paste, args)
+      
+      OV = calculate.overlap(plot.data)
+       
+      OV = lapply(OV[sapply(OV, length) > 0], function(c) {
+        sapply(c, function(i) feature.names[i+1])
+      })
+       
       n.obs <- sapply(OV, length)
       seq.max <- seq_len(max(n.obs))
       mat <- t(sapply(OV, "[", i = seq.max))
