@@ -31,12 +31,12 @@ shinyServer(function(input, output, session) {
     taskId = query[["taskId"]]
     
     # create a Tercen context object using the taskId and token
-    # ctx = tercenCtx(taskId=taskId, authToken=token)
+    ctx = tercenCtx(taskId=taskId, authToken=token)
     
     # for testing
-    options("tercen.workflowId"= "3aa8703da6b7534488c2f9632a0c0b0d")
-    options("tercen.stepId"= "11-6")
-    ctx = tercenCtx()
+    # options("tercen.workflowId"= "3aa8703da6b7534488c2f9632a0c0b0d")
+    # options("tercen.stepId"= "11-6")
+    # ctx = tercenCtx()
     
   })
    
