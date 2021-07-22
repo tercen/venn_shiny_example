@@ -1,6 +1,6 @@
 {
-  "name": "Venn diagram",
-  "description": "A Venn diagram is a diagram that shows all possible logical relations between a finite collection of different sets",
+  "name": "Venn Diagram",
+  "description": "Displays logical relations between data sets as overlapping elipses.",
   "tags": ["basic statistics"],
   "authors": ["mpg-age-bioinformatics","tercen"],
   "urls": ["https://github.com/tercen/venn_shiny_operator"]
